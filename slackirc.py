@@ -63,7 +63,6 @@ def main():
 		if __irc in done:
 			try:
 				msg = __irc.result()[:-2].decode('utf-8')
-				print(msg)
 				if msg[:5] == 'PING ':
 					writer.write(b'PONG ' + msg[5:].encode('utf-8') + b'\r\n')
 					yield from writer.drain()
