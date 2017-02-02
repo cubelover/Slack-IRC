@@ -1,4 +1,4 @@
-SERVER = ('', 0)
+SERVER = ('', )
 NICK = ''
 IRC_CHANNEL = ''
 SLACK_CHANNEL = ''
