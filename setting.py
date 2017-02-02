@@ -1,0 +1,5 @@
+SERVER = ('', 0)
+NICK = ''
+IRC_CHANNEL = ''
+SLACK_CHANNEL = ''
+TOKEN = ''
