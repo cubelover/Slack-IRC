@@ -5,7 +5,8 @@ import asyncio
 import websockets
 import ssl
 import threading
-
+import traceback
+import time
 
 @asyncio.coroutine
 def main():
@@ -86,6 +87,13 @@ def main():
 
 
 if __name__ == '__main__':
-	loop = asyncio.get_event_loop()
-	loop.run_until_complete(main())
-	loop.close()
+	while True:
+		try:
+			loop = asyncio.get_event_loop()
+			loop.run_until_complete(main())
+			loop.close()
+		except Exception as e:
+			print(e)
+			traceback.print_tb(e.__traceback__)
+			print()
+		time.sleep(5)
