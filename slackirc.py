@@ -42,7 +42,17 @@ def main():
 		done, pending = yield from asyncio.wait([__slack, __irc], return_when = asyncio.FIRST_COMPLETED)
 
 		if __slack in done:
-			msg = json.loads(__slack.result())
+			try:
+				msg = json.loads(__slack.result())
+			except Exception as e:
+				print('>>> __slack')
+				print(e)
+				traceback.print_tb(e.__traceback__)
+				print('<<< __slack')
+				print()
+				yield from writer.close()
+				yield from slack.close()
+				break
 			if 'type' in msg and msg['type'] == 'message' and 'subtype' not in msg and msg['channel'] == SLACK_CHANNEL_ID:
 				tmp = msg['text']
 				for x in d:
@@ -80,8 +90,11 @@ def main():
 						s.post('https://slack.com/api/chat.postMessage', data = r)
 						print('<-- | <' + r['username'] + '> ' + r['text'])
 			except Exception as e:
+				print('>>> __irc')
 				print(e)
-				pass
+				traceback.print_tb(e.__traceback__)
+				print('<<< __irc')
+				print()
 		else:
 			__irc.cancel()
 
@@ -93,7 +106,9 @@ if __name__ == '__main__':
 			loop.run_until_complete(main())
 			loop.close()
 		except Exception as e:
+			print('>>> main')
 			print(e)
 			traceback.print_tb(e.__traceback__)
+			print('<<< main')
 			print()
 		time.sleep(5)
