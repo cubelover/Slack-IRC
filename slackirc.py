@@ -36,9 +36,9 @@ def main():
 	slack = yield from websockets.connect(msg['url'])
 	i = 0
 
+	__slack = asyncio.ensure_future(slack.recv())
+	__irc = asyncio.ensure_future(reader.readline())
 	while True:
-		__slack = asyncio.ensure_future(slack.recv())
-		__irc = asyncio.ensure_future(reader.readline())
 		done, pending = yield from asyncio.wait([__slack, __irc], return_when = asyncio.FIRST_COMPLETED)
 
 		if __slack in done:
@@ -53,7 +53,10 @@ def main():
 				yield from writer.close()
 				yield from slack.close()
 				break
-			if 'type' in msg and msg['type'] == 'message' and 'subtype' not in msg and msg['channel'] == SLACK_CHANNEL_ID:
+			for key in msg:
+				print(key, msg[key])
+			print()
+			if 'type' in msg and msg['type'] == 'message' and msg['channel'] == SLACK_CHANNEL_ID and 'text' in msg and 'user' in msg:
 				tmp = msg['text']
 				for x in d:
 					tmp = tmp.replace('<@' + x + '>', '<@' + d[x] + '>')
@@ -68,8 +71,7 @@ def main():
 					writer.write(b'PRIVMSG #%s :%s\r\n' % (settings.IRC_CHANNEL.encode('utf-8'), x.encode('utf-8')))
 					yield from writer.drain()
 					print('--> | ' + x)
-		else:
-			__slack.cancel()
+			__slack = asyncio.ensure_future(slack.recv())
 
 		if __irc in done:
 			try:
@@ -95,9 +97,7 @@ def main():
 				traceback.print_tb(e.__traceback__)
 				print('<<< __irc')
 				print()
-		else:
-			__irc.cancel()
-
+			__irc = asyncio.ensure_future(reader.readline())
 
 if __name__ == '__main__':
 	while True:
